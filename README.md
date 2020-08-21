@@ -1,3 +1,5 @@
+First, we need to thank the author's great work. In this repo, we Just update the Julia from the initial version to 1.5.0. We test the code in the Ubuntu16.04. The remaining is not changed.
+
 # H-OBCA
 Hierarchical Optimization-Based Collision Avoidance - An algorithm for generating dynamically feasible parking trajectories 
 

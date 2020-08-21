@@ -34,8 +34,10 @@
 	x[2,:] = ry
 	x[3,:] = ryaw
 
-	m = Model(solver=IpoptSolver(hessian_approximation="exact",mumps_pivtol=1e-5,
-	                             max_iter=100,tol=1e-5, print_level=3, suppress_all_output="yes"))
+  #m = Model(solver=IpoptSolver(hessian_approximation="exact",mumps_pivtol=1e-5,
+  #                             max_iter=100,tol=1e-5, print_level=3, suppress_all_output="yes"))
+
+  m = Model(with_optimizer(Ipopt.Optimizer));
 
 	W_ev = ego[2]+ego[4]
 	L_ev = ego[1]+ego[3]
@@ -74,14 +76,17 @@
 							+ (x[2,i]+sin(x[3,i])*offset)*sum(Aj[k,2]*lj[k,i] for k=1:vOb[j]) - sum(bj[k]*lj[k,i] for k=1:vOb[j]))
 		end
 	end
-	tic()
-	solve(m; suppress_warnings=true)
-	time = toq();
+	tic=time_ns();
+	JuMP.optimize!(m)
+	time = time_ns()-tic;
 	# print("Auxillery problem time (to warm start dual variables) = ",time," s \n")
 
 
-	lp = getvalue(l)'
-	np = getvalue(n)'
+  #lp = getvalue(l)'
+  #np = getvalue(n)'
+
+  lp = JuMP.value.(l)'
+  np = JuMP.value.(n)'
 
 	return lp,np
 

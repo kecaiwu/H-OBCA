@@ -73,7 +73,6 @@ function plotTraj(xp,up,N,ego,L,nOb,vOb,lOb,disp_title,plotNumb)
 		figure(plotNumb)
 		plot(xp[1:i,1],xp[1:i,2],"b") 	# plot trajectory so far
 		title(disp_title)
-		hold(1)
 
 		# plot trajectory
 		for j = 1 : nOb
@@ -114,8 +113,6 @@ function plotTraj(xp,up,N,ego,L,nOb,vOb,lOb,disp_title,plotNumb)
 		end
 
 	    axis("equal")
-
-	    hold(0)
 
 	    sleep(0.05)
 	end

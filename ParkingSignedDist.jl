@@ -40,9 +40,11 @@ function ParkingSignedDist(x0,xF,N,Ts,L,ego,XYbounds,nOb,vOb, A, b,fixTime,xWS,u
 	# Define IPOPT as solver and well as solver settings
 	##############################
 	# seems to work best
-	m = Model(solver=IpoptSolver(hessian_approximation="exact",mumps_pivtol=1e-6,alpha_for_y="min",recalc_y="yes",
-	                             mumps_mem_percent=6000,max_iter=200,tol=1e-5, print_level=0,
-	                             min_hessian_perturbation=1e-12,jacobian_regularization_value=1e-7))#,nlp_scaling_method="none"
+  #m = Model(with_optimizer(IpoptSolver(hessian_approximation="exact",mumps_pivtol=1e-6,alpha_for_y="min",recalc_y="yes",
+  #                             mumps_mem_percent=6000,max_iter=200,tol=1e-5, print_level=0,
+  #                             min_hessian_perturbation=1e-12,jacobian_regularization_value=1e-7)))#,nlp_scaling_method="none"
+
+  m = Model(with_optimizer(Ipopt.Optimizer));
 
 	##############################
 	# defining optimization variables
@@ -213,15 +215,14 @@ function ParkingSignedDist(x0,xF,N,Ts,L,ego,XYbounds,nOb,vOb, A, b,fixTime,xWS,u
 	##############################
 
 	if fixTime == 0
-		setvalue(timeScale,1*ones(N+1,1))
+    setvalue.(timeScale,1*ones(N+1,1))
 	end
-	setvalue(x,xWS')
-	setvalue(u,uWS[1:N,:]')
+	setvalue.(x,xWS')
+	setvalue.(u,uWS[1:N,:]')
 
 	lWS,nWS = DualMultWS(N,nOb,vOb, A, b,xWS[:,1],xWS[:,2],xWS[:,3])
-
-	setvalue(l,lWS')
-	setvalue(n,nWS')
+	setvalue.(l,lWS')
+	setvalue.(n,nWS')
 
 	##############################
 	# solve problem
@@ -239,9 +240,9 @@ function ParkingSignedDist(x0,xF,N,Ts,L,ego,XYbounds,nOb,vOb, A, b,fixTime,xWS,u
 
 	exitflag = 0
 
-	tic()
-	status = solve(m; suppress_warnings=true)
-	time1 = toq();
+	tic=time_ns();
+	status = JuMP.optimize!(m)
+	time1 = time_ns()-tic;
 
 	if status == :Optimal
 	    exitflag = 1
@@ -291,16 +292,24 @@ function ParkingSignedDist(x0,xF,N,Ts,L,ego,XYbounds,nOb,vOb, A, b,fixTime,xWS,u
 	# print(time)
 	# println(" seconds")
 
-	xp = getvalue(x)
-	up = getvalue(u)
+  #xp = getvalue(x)
+  #up = getvalue(u)
+
+  xp = JuMP.value.(x)
+  up = JuMP.value.(u)
+
 	if fixTime == 1
 		timeScalep = ones(1,N+1)
 	else
-		timeScalep = getvalue(timeScale)
+    #timeScalep = getvalue(timeScale)
+    timeScalep = JuMP.value.(timeScale)
 	end
 
-	lp = getvalue(l)
-	np = getvalue(n)
+  #lp = getvalue(l)
+  #np = getvalue(n)
+
+  lp = JuMP.value.(l)
+  np = JuMP.value.(n)
 
 	return xp, up, timeScalep, exitflag, time, lp, np
 

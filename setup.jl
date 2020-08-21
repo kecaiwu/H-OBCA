@@ -53,5 +53,5 @@ include("DualMultWS.jl")
 include("veloSmooth.jl")
 
 # function that clears terminal output
-clear() = run(@static is_unix() ? `clear` : `cmd /c cls`)
+clear() = run(@static Sys.islinux() ? `clear` : `cmd /c cls`)
 
